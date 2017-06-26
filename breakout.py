@@ -56,12 +56,10 @@ class DQNAgent:
         return model
 
     def remember(self, state, action, reward, next_state, done):
-        # this gives us a number,
-        # 0 in (reward) gives 0 out
-        # +/- 1 in (reward) gives 0.25 out
-        # +/- 10 in (reward) gives 0.95 out
-        # this will help us remember big rewards and not worry too much about smaller ones
-        remember_chance = np.log(np.abs(reward * 0.8) + 1) / np.log(10)
+        remember_chance_map = { 0.0: 0.01,
+                                1.0: 1.0,
+                                -10.0: 1.0 }
+        remember_chance = remember_chance_map[reward]
         self.memory.remember((state, action, reward, next_state, done), remember_chance)
 
     def act(self, state):
