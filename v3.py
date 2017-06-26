@@ -62,7 +62,9 @@ class DQNAgent:
     def act(self, state):
         act_values = self.model.predict(state)
         action = np.argmax(act_values[0])
-        confidence = expit(np.max(act_values[0]))
+        # rewards are 0 or negative so sigmoid gives 0.0 -> 0.5
+        # if we double we get 0.0 -> 1.0
+        confidence = expit(np.max(act_values[0])) * 2.0
         if np.random.rand() > confidence:
             return random.randrange(self.action_size)
         else:
