@@ -57,7 +57,9 @@ class DQNAgent:
 
     def remember(self, state, action, reward, next_state, done):
         if reward == 0.0:
-            remember_chance = 0.01
+            remember_chance = 0.001
+        elif reward > 0.0:
+            remember_chance = 0.1
         else:
             remember_chance = 1.0
         self.memory.remember((state, action, reward, next_state, done), remember_chance)
