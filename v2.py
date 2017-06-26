@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # from https://github.com/keon/deep-q-learning/blob/master/dqn.py
+import argparse
 import random
 import gym
 import numpy as np
@@ -64,11 +65,17 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--render', help='render display (default false)', default=False, action='store_true')
+    parser.add_argument('--load', help='load from file (default false)', default=False, action='store_true')
+    commandline_args = parser.parse_args()
+
     env = gym.make('CartPole-v1')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
-    # agent.load("./save/cartpole-master.h5")
+    if commandline_args.load:
+        agent.load("./save/cartpole-master.h5")
     done = False
     batch_size = 32
 
@@ -76,7 +83,8 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, [1, state_size])
         for time in range(500):
-            env.render()
+            if commandline_args.render:
+                env.render()
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
             reward = reward if not done else -10
@@ -89,5 +97,5 @@ if __name__ == "__main__":
                 break
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
-        # if e % 10 == 0:
-        #     agent.save("./save/cartpole.h5")
+        if e % 10 == 0:
+            agent.save("./save/cartpole.h5")
