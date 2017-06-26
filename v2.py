@@ -10,17 +10,20 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 
-EPISODES = 1000
+EPISODES = 2000
 
 
 class DQNAgent:
-    def __init__(self, state_size, action_size):
+    def __init__(self, state_size, action_size, train=False):
         self.state_size = state_size
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
+        if train:
+            self.epsilon = 1.0  # exploration rate
+        else:
+            self.epsilon = self.epsilon_min
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         self.model = self._build_model()
@@ -68,15 +71,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--render', help='render display (default false)', default=False, action='store_true')
     parser.add_argument('--load', help='load from file (default false)', default=False, action='store_true')
-    parser.add_argument('--save', help='save to file (default false)', default=False, action='store_true')
+    parser.add_argument('--train', help='train and save (default false)', default=False, action='store_true')
     commandline_args = parser.parse_args()
 
     env = gym.make('CartPole-v1')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
-    agent = DQNAgent(state_size, action_size)
+    agent = DQNAgent(state_size, action_size, train=commandline_args.train)
     if commandline_args.load:
-        agent.load("./save/cartpole-master.h5")
+        agent.load("./save/cartpole.h5")
     done = False
     batch_size = 32
 
