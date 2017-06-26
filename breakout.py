@@ -56,10 +56,10 @@ class DQNAgent:
         return model
 
     def remember(self, state, action, reward, next_state, done):
-        remember_chance_map = { 0.0: 0.01,
-                                1.0: 1.0,
-                                -10.0: 1.0 }
-        remember_chance = remember_chance_map[reward]
+        if reward == 0.0:
+            remember_chance = 0.01
+        else:
+            remember_chance = 1.0
         self.memory.remember((state, action, reward, next_state, done), remember_chance)
 
     def act(self, state):
