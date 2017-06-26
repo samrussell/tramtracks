@@ -68,6 +68,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--render', help='render display (default false)', default=False, action='store_true')
     parser.add_argument('--load', help='load from file (default false)', default=False, action='store_true')
+    parser.add_argument('--save', help='save to file (default false)', default=False, action='store_true')
     commandline_args = parser.parse_args()
 
     env = gym.make('CartPole-v1')
@@ -95,7 +96,8 @@ if __name__ == "__main__":
                 print("episode: {}/{}, score: {}, e: {:.2}"
                       .format(e, EPISODES, time, agent.epsilon))
                 break
-        if len(agent.memory) > batch_size:
-            agent.replay(batch_size)
-        if e % 10 == 0:
-            agent.save("./save/cartpole.h5")
+        if commandline_args.train:
+            if len(agent.memory) > batch_size:
+                agent.replay(batch_size)
+            if e % 10 == 0:
+                agent.save("./save/cartpole.h5")
