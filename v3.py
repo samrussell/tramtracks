@@ -14,16 +14,15 @@ from scipy.special import expit
 EPISODES = 2000
 
 class Memory:
-    def __init__(self, mem_size, remember_chance):
+    def __init__(self, mem_size):
         self.mem_size = mem_size
         self.memory = []
-        self.remember_chance = remember_chance
 
     def is_full(self):
         return len(self.memory) == self.mem_size
 
-    def remember(self, value):
-        if np.random.rand() > self.remember_chance:
+    def remember(self, value, remember_chance):
+        if np.random.rand() > remember_chance:
             return
 
         if self.is_full():
@@ -36,7 +35,7 @@ class DQNAgent:
     def __init__(self, state_size, action_size, train=False):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = Memory(2000, remember_chance=1.0)
+        self.memory = Memory(2000)
         self.gamma = 0.95    # discount rate
         self.learning_rate = 0.001
         self.model = self._build_model()
@@ -52,7 +51,13 @@ class DQNAgent:
         return model
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.remember((state, action, reward, next_state, done))
+        # this gives us a number,
+        # 0 in (reward) gives 0 out
+        # +/- 1 in (reward) gives 0.25 out
+        # +/- 10 in (reward) gives 0.95 out
+        # this will help us remember big rewards and not worry too much about smaller ones
+        remember_chance = np.log(np.abs(reward * 0.8) + 1) / np.log(10)
+        self.memory.remember((state, action, reward, next_state, done), remember_chance)
 
     def act(self, state):
         act_values = self.model.predict(state)
