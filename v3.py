@@ -13,11 +13,26 @@ from scipy.special import expit
 
 EPISODES = 2000
 
+class Memory:
+    def __init__(self, mem_size, remember_chance):
+        self.mem_size = mem_size
+        self.memory = []
+        self.remember_chance = remember_chance
+
+    def is_full(self):
+        return len(self.memory) == self.mem_size
+
+    def remember(self, value):
+        if np.random.rand() > self.remember_chance:
+            return
+
+
 
 class DQNAgent:
     def __init__(self, state_size, action_size, train=False):
         self.state_size = state_size
         self.action_size = action_size
+        #self.memory = Memory(200, remember_chance=0.01)
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
         self.learning_rate = 0.001
@@ -40,7 +55,7 @@ class DQNAgent:
         act_values = self.model.predict(state)
         action = np.argmax(act_values[0])
         confidence = expit(np.max(act_values[0]))
-        if np.random.rand() <= confidence:
+        if np.random.rand() > confidence:
             return random.randrange(self.action_size)
         else:
             return action
