@@ -71,8 +71,8 @@ class DQNAgent:
         max_confidence = np.max(act_values[0])
         mean_confidence = np.mean(act_values[0])
         vote_confidence = expit(max_confidence - mean_confidence)
-        print act_values[0]
-        print vote_confidence
+        #print act_values[0]
+        #print vote_confidence
         if np.random.rand() > vote_confidence:
             return random.randrange(self.action_size)
         else:
@@ -118,19 +118,21 @@ if __name__ == "__main__":
     for e in range(EPISODES):
         state = env.reset()
         state = np.reshape(state, (1, ) + state_size)
+        points = 0
         for time in range(500):
             if commandline_args.render:
                 env.render()
             action = agent.act(state)
-            print("action %d" % action)
+            #print("action %d" % action)
             next_state, reward, done, _ = env.step(action)
+            points += reward
             reward = reward if not done else -10
             next_state = np.reshape(next_state, (1, ) + state_size)
             agent.remember(state, action, reward, next_state, done)
             state = next_state
             if done:
                 print("episode: {}/{}, score: {}"
-                      .format(e, EPISODES, time))
+                      .format(e, EPISODES, points))
                 break
         if commandline_args.train:
             if len(agent.memory.memory) > batch_size:
