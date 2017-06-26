@@ -70,7 +70,9 @@ class DQNAgent:
         # take difference between max confidence and mean confidence
         max_confidence = np.max(act_values[0])
         mean_confidence = np.mean(act_values[0])
-        vote_confidence = expit(max_confidence - mean_confidence)
+        #vote_confidence = expit(max_confidence - mean_confidence)
+        # if you're only 5% sure then you only get a 5% vote
+        vote_confidence = max_confidence - mean_confidence
         #print act_values[0]
         #print vote_confidence
         if np.random.rand() > vote_confidence:
