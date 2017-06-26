@@ -26,14 +26,17 @@ class Memory:
         if np.random.rand() > self.remember_chance:
             return
 
+        if self.is_full():
+            self.memory[np.random.choice(self.mem_size)] = value
+        else:
+            self.memory.append(value)
 
 
 class DQNAgent:
     def __init__(self, state_size, action_size, train=False):
         self.state_size = state_size
         self.action_size = action_size
-        #self.memory = Memory(200, remember_chance=0.01)
-        self.memory = deque(maxlen=2000)
+        self.memory = Memory(2000, remember_chance=1.0)
         self.gamma = 0.95    # discount rate
         self.learning_rate = 0.001
         self.model = self._build_model()
@@ -49,7 +52,7 @@ class DQNAgent:
         return model
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        self.memory.remember((state, action, reward, next_state, done))
 
     def act(self, state):
         act_values = self.model.predict(state)
@@ -61,7 +64,7 @@ class DQNAgent:
             return action
 
     def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size)
+        minibatch = random.sample(self.memory.memory, batch_size)
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
@@ -111,7 +114,7 @@ if __name__ == "__main__":
                       .format(e, EPISODES, time))
                 break
         if commandline_args.train:
-            if len(agent.memory) > batch_size:
+            if len(agent.memory.memory) > batch_size:
                 agent.replay(batch_size)
             if e % 10 == 0:
                 agent.save("./save/cartpole.h5")
