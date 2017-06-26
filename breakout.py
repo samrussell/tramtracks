@@ -119,7 +119,7 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, (1, ) + state_size)
         points = 0
-        for time in range(500):
+        while True:
             if commandline_args.render:
                 env.render()
             action = agent.act(state)
