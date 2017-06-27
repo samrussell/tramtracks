@@ -44,11 +44,17 @@ class DQNAgent:
         return model
 
     def act(self, state):
-        # doesn't always push the fire button
-        if np.random.rand() < 0.05:
+        act_values = self.model.predict(self.scale_state(state))
+        action = np.argmax(act_values[0])
+        # take difference between max confidence and mean confidence
+        max_confidence = np.max(act_values[0])
+        mean_confidence = np.mean(act_values[0])
+        scaled_confidence = (max_confidence - mean_confidence) - 1.0
+        vote_confidence = expit(scaled_confidence) * 0.95
+        if np.random.rand() > vote_confidence:
             return random.randrange(self.action_size)
         else:
-            return np.argmax(self.model.predict(self.scale_state(state)))
+            return action
 
     def save(self, name):
         # just save the best one
