@@ -13,8 +13,9 @@ from keras.optimizers import Adam
 from scipy.special import expit
 
 EPISODES = 2000
-TRIALS_PER_BRAIN = 5
-MAX_BRAINS = 80
+TRIALS_PER_BRAIN = 2
+MAX_BRAINS = 40
+LEARNING_RATE = 0.1
 
 class DQNAgent:
     def __init__(self, state_size, action_size, train=False):
@@ -41,6 +42,16 @@ class DQNAgent:
     def act(self, state):
         return np.argmax(self.model.predict(state))
 
+    def save(self, name):
+        # just save the best one
+        self.model.set_weights(self.brains[0])
+        self.model.save_weights(name)
+
+    def load(self, name):
+        # just load the best one
+        self.model.load_weights(name)
+        self.brains = [self.model.get_weights()]
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--render', help='render display (default false)', default=False, action='store_true')
@@ -52,8 +63,8 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size, train=commandline_args.train)
-    #if commandline_args.load:
-    #    agent.load("./save/cartpole.h5")
+    if commandline_args.load:
+        agent.load("./save/cartpole.h5")
     done = False
     batch_size = 32
 
@@ -78,7 +89,7 @@ if __name__ == "__main__":
                     if done:
                         break
                 score += time
-            scored_brains.append((brain, score))
+            scored_brains.append((brain, score/TRIALS_PER_BRAIN))
             #print("brain got score %d" % score)
             sys.stdout.write('.')
         scores = [x[1] for x in scored_brains]
@@ -99,13 +110,12 @@ if __name__ == "__main__":
                     # update every even number layer
                     new_brain = []
                     for index, layer in enumerate(brain):
+                        new_layer = layer.copy()
                         if index % 2 == 0:
-                            mutation = np.random.random_sample(layer.shape) * 0.1 - 0.05
-                            layer += mutation
-                        new_brain.append(layer)
+                            mutation = np.random.random_sample(layer.shape) * LEARNING_RATE - (LEARNING_RATE / 2.0)
+                            new_layer += mutation
+                        new_brain.append(new_layer)
                     mutant_brains.append(new_brain)
             new_brains += mutant_brains
             agent.brains = new_brains
-
-            #if e % 10 == 0:
-            #    agent.save("./save/cartpole.h5")
+            agent.save("./save/cartpole.h5")
