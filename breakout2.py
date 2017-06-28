@@ -15,7 +15,7 @@ from scipy.special import expit
 EPISODES = 2000
 TRIALS_PER_BRAIN = 1
 MAX_BRAINS = 40
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.5
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -127,7 +127,8 @@ if __name__ == "__main__":
                     for index, layer in enumerate(brain):
                         new_layer = layer.copy()
                         if index % 2 == 0:
-                            mutation = np.random.random_sample(layer.shape) * LEARNING_RATE - (LEARNING_RATE / 2.0)
+                            scaling = np.random.rand() * LEARNING_RATE
+                            mutation = np.random.random_sample(layer.shape) * scaling - (scaling / 2.0)
                             new_layer += mutation
                         new_brain.append(new_layer)
                     mutant_brains.append(new_brain)
