@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 from scipy.special import expit
 
 EPISODES = 2000
-TRIALS_PER_BRAIN = 1
+TRIALS_PER_BRAIN = 10
 MAX_BRAINS = 40
 LEARNING_RATE = 0.5
 
