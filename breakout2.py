@@ -45,12 +45,16 @@ class DQNAgent:
 
     def act(self, state):
         act_values = self.model.predict(self.scale_state(state))
-        action = np.argmax(act_values[0])
+        confidences = act_values[0]
+        action = np.argmax(confidences)
+        sigmoid_confidences = expit(confidences)
+        softmax_confidences = sigmoid_confidences / np.sum(sigmoid_confidences)
+        vote_confidence = np.max(softmax_confidences)
         # take difference between max confidence and mean confidence
-        max_confidence = np.max(act_values[0])
-        mean_confidence = np.mean(act_values[0])
-        scaled_confidence = (max_confidence - mean_confidence) - 1.0
-        vote_confidence = expit(scaled_confidence) * 0.95
+        #max_confidence = np.max(act_values[0])
+        #mean_confidence = np.mean(act_values[0])
+        #scaled_confidence = (max_confidence - mean_confidence) - 1.0
+        #vote_confidence = expit(scaled_confidence) * 0.95
         if np.random.rand() > vote_confidence:
             return random.randrange(self.action_size)
         else:
